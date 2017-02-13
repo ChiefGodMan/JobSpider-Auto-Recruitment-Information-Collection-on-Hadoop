@@ -1,0 +1,16 @@
+1. After start the hbase. in linux shell:
+    $hbase shell
+
+### table for segmentation
+create 'Word','word'
+
+###table for inverseIndexing
+
+create 'DocFrequency','docfrequency'
+create 'DocLength','doclength'
+create 'TermFrequency','termfrequency'
+
+truncate 'Word'
+truncate 'DocLength'
+truncate 'DocFrequency'
+truncate 'TermFrequency'
