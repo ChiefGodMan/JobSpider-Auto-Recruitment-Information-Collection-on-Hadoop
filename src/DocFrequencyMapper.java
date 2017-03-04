@@ -16,7 +16,7 @@ public class DocFrequencyMapper extends Mapper<Object, Text, Text, Text> {
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
         //the input is stringline,the output is <item,path>
         FileSplit inputSplit = (FileSplit) context.getInputSplit();
-        String path = inputSplit.getPath().toString();
+        String name = inputSplit.getPath().getName();
 
         if (value.getLength() > 0) {//filtering the space string
             StringTokenizer stringTokens = new StringTokenizer(value.toString(), WordSegmentationMain.dilimt);
@@ -24,7 +24,7 @@ public class DocFrequencyMapper extends Mapper<Object, Text, Text, Text> {
                 String word = stringTokens.nextToken().toLowerCase();
                 if(!CommonStaticClass.stopWordsHS.contains(word)){
                     outputKey.set(word);
-                    outputValue.set(path);
+                    outputValue.set(name);
                     context.write(outputKey, outputValue);
                 }
             }

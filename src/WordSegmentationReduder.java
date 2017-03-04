@@ -16,10 +16,12 @@ import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 public class WordSegmentationReduder extends Reducer<Text, Text, NullWritable, Text> {
     private MultipleOutputs<NullWritable, Text> multipleOutputs;// used to output multiple files
 
+    @Override
     public void setup(Context context) throws IOException, InterruptedException {
         multipleOutputs = new MultipleOutputs<NullWritable, Text>(context);
     }
 
+    @Override
     public void reduce(Text key, Iterable<Text> values, Context context)
             throws IOException, InterruptedException {
         String segStr = "";
@@ -34,5 +36,11 @@ public class WordSegmentationReduder extends Reducer<Text, Text, NullWritable, T
         }
         //context.write(key, new Text(segStr));
         multipleOutputs.write(NullWritable.get(), new Text(segStr), key.toString());
+    }
+
+    @Override
+    protected void cleanup(Context context) throws IOException, InterruptedException {
+        //Only after close the object then the output can write to hdfs immediately
+        multipleOutputs.close();
     }
 }

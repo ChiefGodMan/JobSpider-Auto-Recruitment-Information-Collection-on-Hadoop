@@ -12,11 +12,11 @@ public class DocLengthReducerHBase extends TableReducer<Text, Text, ImmutableByt
 
     private static String columnFamily = "doclength";
 
-    public void reduce(Text key, Iterable<Integer> values, Context context) throws IOException, InterruptedException {
+    public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
         int times = 0;//the item frequency in the doc
-        for (Integer value : values) {
-            times += value;//sum the times of all addresses
+        for (Text value : values) {
+            times += Integer.parseInt(value.toString());//sum the times of all addresses
         }
         String outputTimes = Integer.toString(times);//construct the output value string
         Put put = new Put(key.toString().getBytes());

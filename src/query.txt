@@ -1,0 +1,2 @@
+ailias          yangcheng01@ict.ac.cn        spark      人工智能     深度学习        神经网络    图像识别    机器学习    大数据     自然语言    语音识别
+godman  771724715@qq.com    机器学习    人工智能    深度学习    神经网络    spark   hadoop  tensorflow

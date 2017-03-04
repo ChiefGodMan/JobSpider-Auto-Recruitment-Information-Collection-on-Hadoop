@@ -8,15 +8,15 @@ import java.util.StringTokenizer;
 /**
  * Created by ailias on 5/26/16.
  */
-public class DocLengthMapper extends Mapper<Object, Text, Text, Integer> {
+public class DocLengthMapper extends Mapper<Object, Text, Text, Text> {
 
     private Text outputKey = new Text();//the output key
-    private Integer outputValue ;//the output value treemap struct
+    private Text outputValue ;//the output value treemap struct
 
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
         //the input is stringline, the output is <path,doclen>
         FileSplit inputSplit = (FileSplit) context.getInputSplit();
-        String path = inputSplit.getPath().toString();
+        String name = inputSplit.getPath().getName();
 
         if (value.getLength() > 0) {//filtering the space string
             StringTokenizer stringTokens = new StringTokenizer(value.toString(), WordSegmentationMain.dilimt);
@@ -27,8 +27,8 @@ public class DocLengthMapper extends Mapper<Object, Text, Text, Integer> {
                     doclen+=1;
                 }
             }
-            outputKey.set(path);
-            outputValue=new Integer(doclen);
+            outputKey.set(name);
+            outputValue=new Text(Integer.toString(doclen));
             context.write(outputKey, outputValue);
         }
     }

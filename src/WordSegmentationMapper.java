@@ -55,7 +55,7 @@ public class WordSegmentationMapper extends Mapper<Object, Text, Text, Text> {
                         int sentenceLen = words.length() - wordSplitedIndex > WordSegmentationMain.sentenceLen ? WordSegmentationMain.sentenceLen : words.length() - wordSplitedIndex;
                         String newWords = words.substring(wordSplitedIndex, wordSplitedIndex + sentenceLen);
                         //get the words segmentation
-                        Date seg_start_time = new Date();
+//                        Date seg_start_time = new Date();
                         NGram.getSegs(newWords, startIndex, seg, segResult);
                         //get the result index in segResult map.
                         TreeMap<Double, Integer> probIndexMap = new TreeMap<>();//set the <prob,index> map value
@@ -66,8 +66,8 @@ public class WordSegmentationMapper extends Mapper<Object, Text, Text, Text> {
                             List<String> segRes = segResult.get(probIndexMap.lastEntry().getValue());
                             segResultStr += " " + String.join(" ", segRes);
                         }
-                        Date seg_stop_time = new Date();
-                        System.out.format("seg&mle-time:%d\n", seg_stop_time.getTime() - seg_start_time.getTime());
+//                        Date seg_stop_time = new Date();
+//                        System.out.format("seg&mle-time:%d\n", seg_stop_time.getTime() - seg_start_time.getTime());
                     }
                 }
             }

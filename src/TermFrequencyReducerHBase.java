@@ -15,14 +15,13 @@ public class TermFrequencyReducerHBase extends TableReducer<Text, Text, Immutabl
     //private Text outputValue = new Text();
     private static String columnFamily = "termfrequency";
 
-    public void reduce(Text key, Iterable<Integer> values, Context context) throws IOException, InterruptedException {
+    public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
         int times = 0;//the item frequency in the doc
-        for (Integer value : values) {
-            times += value;//sum the times of all addresses
+        for (Text value : values) {
+            times += Integer.parseInt(value.toString());//sum the times of all addresses
         }
-        Integer terFreq = new Integer(times);
         Put put = new Put(key.toString().getBytes());
-        put.addColumn(columnFamily.getBytes(), columnFamily.getBytes(), terFreq.toString().getBytes());
+        put.addColumn(columnFamily.getBytes(), columnFamily.getBytes(), Integer.toString(times).getBytes());
         context.write(null, put);
         //context.write(new ImmutableBytesWritable(key.getBytes()), put);
     }

@@ -1,3 +1,5 @@
 .idea
 files/training
 out
+*.jar
+lib/
