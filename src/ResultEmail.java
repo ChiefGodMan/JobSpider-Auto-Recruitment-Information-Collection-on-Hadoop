@@ -9,6 +9,8 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.io.*;
 import java.util.*;
 import javax.mail.*;
@@ -21,6 +23,7 @@ public class ResultEmail {
     private HashMap<String, String[]> emailQueriesMap;//<email,queries[]> key-value pair
     private static final String contenfFileName = "files/mailContent.txt";
     private BufferedReader reader = null;
+    private static int infoCount = 25;
 
 
     public ResultEmail(FileSystem fileSystem, String queryFileName) {
@@ -60,17 +63,94 @@ public class ResultEmail {
         }
     }
 
+    /**
+     * parsing the pku url from the ori_url
+     *
+     * @param ori_url
+     * @return
+     */
+    public String parsePkuUrl(String ori_url) {
+        String str_pattern = "\\d+$";
+        Pattern pattern = Pattern.compile(str_pattern);
+        Matcher matcher = pattern.matcher(ori_url);
+        if (matcher.find()) {
+            return "https://bbs.pku.edu.cn/v2/post-read.php?bid=845&threadid=" + matcher.group(0);
+        } else {
+            System.out.println("No pattern for this url:" + ori_url);
+            return ori_url;
+        }
+    }
+
+    /**
+     * parsing the newsmth url from the ori_url
+     *
+     * @param ori_url
+     * @return
+     */
+    public String parseNewsmthUrl(String ori_url) {
+        String str_pattern = "\\d+$";
+        Pattern pattern = Pattern.compile(str_pattern);
+        Matcher matcher = pattern.matcher(ori_url);
+        if (matcher.find()) {
+            //return "http://www.newsmth.net/nForum/#!article/Career_Campus/" +matcher.group(0);
+            return "http://www.newsmth.net/nForum/article/Career_Campus/" + matcher.group(0);
+        } else {
+            System.out.println("No pattern for this url:" + ori_url);
+            return ori_url;
+        }
+    }
+
+    /**
+     * parsing the yssy url from the ori_url
+     *
+     * @param ori_url
+     * @return
+     */
+    public String parseYssyUrl(String ori_url) {
+        String str_pattern = "\\d+";
+        Pattern pattern = Pattern.compile(str_pattern);
+        Matcher matcher = pattern.matcher(ori_url);
+        if (matcher.find()) {
+            return "http://bbs.sjtu.edu.cn/bbscon,board,JobInfo,file,M." + matcher.group(0) + ".A.html";
+        } else {
+            System.out.println("No pattern for this url:" + ori_url);
+            return ori_url;
+        }
+    }
+
+    /**
+     * main entry for parsing url.
+     *
+     * @param ori_url
+     * @return
+     */
+    public String parseUlr(String ori_url) {
+        String url = ori_url;
+        if (ori_url.matches("(.*)bbs.pku.edu.cn(.*)")) {
+            url = parsePkuUrl(ori_url);
+        } else if (ori_url.matches("(.*)newsmth.net(.*)")) {
+            url = parseNewsmthUrl(ori_url);
+        } else if (ori_url.matches("(.*)bbs.sjtu.edu.cn(.*)")) {
+            url = parseYssyUrl(ori_url);
+        } else {
+            System.out.println("Can not parse the url:" + ori_url);
+        }
+        return url;
+    }
+
     public String getMailContentFile(FileSystem fileSystem, String toEmail, String[] results) throws IOException {
         String contentStr = "<center><h3>WantJob: Latest Daily Recruitment Information</h3></center><p>";
-        contentStr += "Dear " + this.emailNameMap.get(toEmail) + ":<p>&nbsp;&nbsp;&nbsp;&nbsp; Your input query words are: <p>&nbsp;&nbsp;&nbsp;&nbsp;";
+        contentStr += "<p><h4>Dear " + this.emailNameMap.get(toEmail) + ":</h4></p><p style='padding-left:20px'>Your input query words are: </p><p style='padding-left:20px'>";
         String[] queries = this.emailQueriesMap.get(toEmail);
         for (int qindex = 0; qindex < queries.length; qindex++) { //read all queries string to the content
             contentStr = contentStr + " " + queries[qindex];
         }
-        contentStr += "<p>The following are your results:<p>";
-        for (int rindex = 0; rindex < results.length; rindex++) {//read all results to the content
+        contentStr += "</p><p style='padding-left:20px'>The followings are your results:</p><p>";
+        String url;
+        for (int rindex = 0; rindex < results.length && rindex <= infoCount; rindex++) {//read all results to the content
             String[] url_title = results[rindex].split("#");
-            contentStr = contentStr + "<li>" + Integer.toString(rindex + 1) + " : <a href='" + url_title[0] + "'>" + url_title[1] + "</a></li><br>";
+            url = parseUlr(url_title[0]);
+            contentStr = contentStr + "<li>" + Integer.toString(rindex + 1) + " : <a href='" + url + "'>" + url_title[1] + "</a></li><br>";
         }
         Path filePath = new Path("hdfs://namenode:9000/" + contenfFileName);
         //Path filePath = new Path(contenfFileName);
@@ -114,23 +194,16 @@ public class ResultEmail {
         return this.emailQueriesMap;
     }
 
-    public void sendEmail(FileSystem fileSystem, String date, String toEmail, String[] results) throws IOException {
+    public void sendEmail(String username, String password, FileSystem fileSystem, String date, String toEmail, String[] results) throws IOException {
         // Get system properties
         Properties properties = System.getProperties();
         //properties.put("mail.debug","true"); //used for debug the send mail process.
         properties.put("mail.smtp.auth", "true");
-        properties.put("mail.smtp.host", "smtp.ict.ac.cn");
+        properties.put("mail.smtp.host", "smtp.qq.com");
         properties.put("mail.smtp.port", "25");
         //properties.put("mail.smtp.ssl.enable", "true");
         properties.put("mail.transport.protocol", "smtp");
         Session session = Session.getDefaultInstance(properties);
-//        Session session = Session.getInstance(properties,
-//                new javax.mail.Authenticator() {
-//                    protected PasswordAuthentication getPasswordAuthentication() {
-//                        return new PasswordAuthentication(username, password);
-//                    }
-//                }
-//        );
         Transport transport = null;
         try {
             //parse the email[] string to Address[]
@@ -138,13 +211,12 @@ public class ResultEmail {
             toEmailsAddrArr[0] = new InternetAddress(toEmail);
             //create a message
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("yangcheng01@ict.ac.cn"));
+	    //input your sending email
+            message.setFrom(new InternetAddress(username));
             //message.setRecipients(Message.RecipientType.TO,toEmailsAddrArr);
             message.setSubject("[" + date + "] WantJob: The Latest Daily Recruitment Information");
             String content = getMailContentFile(fileSystem, toEmail, results);
             message.setContent(content, "text/html;charset=UTF-8");
-            String username = "yangcheng01@ict.ac.cn";
-            String password = "yjh1990111808";
             //create a transport
             transport = session.getTransport();
             transport.connect(username, password);
@@ -152,6 +224,7 @@ public class ResultEmail {
             transport.close();
         } catch (MessagingException e) {
             e.printStackTrace();
+            System.out.println("Send Email to " + toEmail + " Failed:\n"+e);
         }
         System.out.println("Send Email to " + toEmail + " Success\n");
     }

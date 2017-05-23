@@ -5,6 +5,8 @@ This tutorial is tell you how to use the scrapy code:
 
 2. run the scrapy spider(be careful that the spider name is the NewsmthScrapy/spiders/NewsmthSpider-->>NewsmthSpider class's name value):
    $ scrapy crawl NewsmthSpider
+   $ scrapy crawl PkuSpider
+   $ scrapy crawl YssySpider
    the crawl output file is NewsmthScrapy/output/SpiderName.json
 
 3. run jsonDataProcess py file to extract the output file to multiple files for each line.

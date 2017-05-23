@@ -1,4 +1,16 @@
-<p>The recruitment information of this system are coming from newsmth.net(水木社区-清华),bbs.sjtu.edu.cn(饮水思源-上交),
-<p>Enjoy yourself.
-
-<h3>Ailias Team</h3>
+<div>This system will automatically send the latest daily job information to you everyday on the basis of your query words(Chinese or English)</div>
+<div>The current recruitment information of this system is collected from :</div>
+<h4>
+<div><li>newsmth.net(水木社区-清华)</li></div>
+<div><li>bbs.pku.edu.cn(北大未名-北大)</li></div>
+<div><li>bbs.sjtu.edu.cn(饮水思源-上交)</li></div>
+</h4>
+<div>We are preparing for collecting more information from the state of art bbs/forum,such as</div>
+<div><li>fudanu.com(日月光华-复旦)</li></div>
+<div><li>bbs.nju.edu.cn(小百合-南大)</li></div>
+<div><li>bbs.zju.edu.cn(飘渺水云间-浙大)</li></div>
+<div><li>buaaer.com(向北航行-北航)</li></div>
+<div><li>...</li></div>
+<div><h4>Enjoy!</h4></div>
+<div><h4>GodMan Team</h4></div>
+<div><h4>Contacts:yangcheng01@ict.ac.cn</h4></div>

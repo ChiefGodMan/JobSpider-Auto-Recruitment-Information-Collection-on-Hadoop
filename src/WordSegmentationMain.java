@@ -55,6 +55,7 @@ public class WordSegmentationMain {
      * @throws ClassNotFoundException
      */
     public static void createWordFrequencyJob(Configuration conf, String inputFilePath) throws IOException, InterruptedException, ClassNotFoundException {
+        System.out.println("Starting processing WordFrequency job");
         Job job = Job.getInstance(conf, "WordFrequency");
         job.setJarByClass(WordSegmentationMain.class);
         job.setMapperClass(WordFrequencyMapper.class);
@@ -63,6 +64,7 @@ public class WordSegmentationMain {
         TableMapReduceUtil.initTableReducerJob(WordSegmentationMain.tableName, WordFrequencyReduder.class, job);
         FileInputFormat.addInputPath(job, new Path(inputFilePath));
         job.waitForCompletion(true);
+        System.out.println("Finished processing WordFrequency job");
     }
 
     /**
@@ -74,6 +76,7 @@ public class WordSegmentationMain {
      * @throws InterruptedException
      */
     public static void createWordSegmentationJob(Configuration conf, String inputFilePath, String outPath) throws IOException, ClassNotFoundException, InterruptedException {
+        System.out.println("Starting processing WordSegmentation job");
         Job job = Job.getInstance(conf, "WordSegmentation");
         job.setJarByClass(WordSegmentationMain.class);
         job.setMapperClass(WordSegmentationMapper.class);
@@ -91,6 +94,7 @@ public class WordSegmentationMain {
 
         FileOutputFormat.setOutputPath(job, new Path(outPath));
         job.waitForCompletion(true);
+        System.out.println("Finished processing WordSegmentation job");
     }
 
     //************************************end of word segmentation********************************************************//
@@ -108,6 +112,7 @@ public class WordSegmentationMain {
      * @throws ClassNotFoundException
      */
     public static void calDocLength(Configuration conf, String inputPath) throws IOException, InterruptedException, ClassNotFoundException {
+        System.out.println("Starting processing DocLength job");
         //1.this block code is used to count the document length
         String tableName = "DocLength";
         Job docLenjob = Job.getInstance(conf, "DocLength");
@@ -120,6 +125,7 @@ public class WordSegmentationMain {
         docLenjob.setNumReduceTasks(5);//reducer task's number
         FileInputFormat.addInputPath(docLenjob, new Path(inputPath));
         docLenjob.waitForCompletion(true);
+        System.out.println("Finished processing DocLength job");
     }
 
 
@@ -132,6 +138,7 @@ public class WordSegmentationMain {
      * @throws ClassNotFoundException
      */
     public static void calDocFrequency(Configuration conf, String inputPath) throws IOException, InterruptedException, ClassNotFoundException {
+        System.out.println("Starting processing DocFrequency job");
         //2.this block code is used to count how many docs include this item
         String tableName = "DocFrequency";
         Job docFreqJob = Job.getInstance(conf, "DocFrequency");
@@ -144,6 +151,7 @@ public class WordSegmentationMain {
         docFreqJob.setNumReduceTasks(2);//reducer task's number
         FileInputFormat.addInputPath(docFreqJob, new Path(inputPath));
         docFreqJob.waitForCompletion(true);
+        System.out.println("Finished processing DocFrequency job");
     }
 
 
@@ -157,6 +165,7 @@ public class WordSegmentationMain {
      * @throws ClassNotFoundException
      */
     public static void calTermFrequency(Configuration conf, String inputPath) throws IOException, InterruptedException, ClassNotFoundException {
+        System.out.println("Starting processing TermFrequency job");
         //3.this block code is used to count each item frequency in each document
         String tableName = "TermFrequency";
         Job termFreqJob = Job.getInstance(conf, "TermFrequency");
@@ -169,6 +178,7 @@ public class WordSegmentationMain {
         termFreqJob.setNumReduceTasks(2);//reducer task's numbe
         FileInputFormat.addInputPath(termFreqJob, new Path(inputPath));
         termFreqJob.waitForCompletion(true);
+        System.out.println("Finished processing TermFrequency job");
     }
 
     /**
@@ -344,10 +354,12 @@ public class WordSegmentationMain {
         Path srcPath = new Path(src); //原路径
         Path dstPath = new Path(dst); //目标路径
         //调用文件系统的文件复制函数,前面参数是指是否删除原文件，true为删除，默认为false
+        fs.delete(dstPath);
         fs.copyFromLocalFile(false, srcPath, dstPath);
-        fs.close();
+        //fs.close();
         System.out.println("Finished copying files.");
     }
+
 
     //******************************end of inverse indexing**********************************//
 
@@ -357,26 +369,32 @@ public class WordSegmentationMain {
         //@@@Important: add the jar file to all node.
         //conf.set("mapred.jar", "WordSegmentation.jar");
         FileSystem fileSystem = FileSystem.get(conf);
+        uploadFile(conf, "files", "hdfs://namenode:9000/files");
+        //Load the word from dict
+        CommonStaticClass.loadWordDict(fileSystem, dictFileName);
+        //Load the stopWord from dict
+        CommonStaticClass.loadStopWordDict(fileSystem, stopDictFileName);
+        //create all we needed tables.
+        createHBaseTables(conf);
+
+	//input your qq email and password for sending emails to users.
+	String username = "your-qq@qq.com";
+	String password = "your password";
 
         while (true) {
             DateFormat dirDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String dateDir = dirDateFormat.format(new Date());
-            //String localFilePath = "NewsmthScrapy/NewsmthScrapy/files/" + dateDir;
+            Date yesterday = new Date(System.currentTimeMillis() - 1000 * 60 * 60 * 24);
+            String dateDir = dirDateFormat.format(yesterday);
+            String localFilePath = "NewsmthScrapy/NewsmthScrapy/files/" + dateDir;
             String inputFilePath = "hdfs://namenode:9000/input/" + dateDir;
             String outPath = "hdfs://namenode:9000/output/" + dateDir;
             if (fileSystem.exists(new Path(inputFilePath)) && !fileSystem.exists(new Path(outPath))) {
                 System.out.println("Starting processing the files");
-                //Load the word from dict
-                CommonStaticClass.loadWordDict(fileSystem, dictFileName);
-                //Load the stopWord from dict
-                CommonStaticClass.loadStopWordDict(fileSystem, stopDictFileName);
-                //create all we needed tables.
-                createHBaseTables(conf);
                 //copy local files to hdfs
-                //uploadFile(conf, localFilePath, inputFilePath);
+                uploadFile(conf, "files/query.txt", "hdfs://namenode:9000/files/query.txt");
                 //--------------------begin comment from here--------------------------------------//
                 //read all docfrequency and doclength to map for queryRanking
-                //mapreduce job for updating word frequency in the table.`
+                // mapreduce job for updating word frequency in the table.`
                 WordSegmentationMain.createWordFrequencyJob(conf, inputFilePath);
                 //mapreduce job for segmentation in all files and output to hdfs(output)
                 WordSegmentationMain.createWordSegmentationJob(conf, inputFilePath, outPath);
@@ -389,25 +407,31 @@ public class WordSegmentationMain {
                 //---------------------End comment from here--------------------------------------//
                 //tips: do not delete the next function call
                 readAllDatasFromHBase(conf);//update the <item, value> pairs.
-                ResultEmail sendEmail = new ResultEmail(fileSystem, queryFileName);
-                HashMap<String, String[]> emailQueriesMap = sendEmail.getEmailQueriesMap();
+
+		//send job info email to users.
+                ResultEmail sendEmailObj = new ResultEmail(fileSystem, queryFileName);
+                HashMap<String, String[]> emailQueriesMap = sendEmailObj.getEmailQueriesMap();
                 String[] resultArr = null;//get the result url array
                 for (Map.Entry<String, String[]> queryEntry : emailQueriesMap.entrySet()) {
                     //Query string array
                     //String[] queries = {"人工智能", "深度学习", "神经网络", "机器学习", "图像识别"};
                     //inverse indexing for doc
                     NavigableMap<Double, String> res = queryRanking(conf, dateDir, queryEntry.getValue());
-                    resultArr = new String[res.size()];
-                    int index = 0;
-                    for (Map.Entry<Double, String> resEntry : res.entrySet()) {
-                        resultArr[index++] = resEntry.getValue().replace("-r-00000", "").replace("+", "/").replace("-", ":").split("=")[1];
+                    if (res.size() > 0) {//means the result is not null, send it to the user.
+                        resultArr = new String[res.size()];
+                        int index = 0;
+                        for (Map.Entry<Double, String> resEntry : res.entrySet()) {
+                            resultArr[index++] = resEntry.getValue().replace("-r-00000", "").split("=")[1];
+                        }
+                        sendEmailObj.sendEmail(username, password, fileSystem, dateDir, queryEntry.getKey(), resultArr);
+                    } else {//no result for the user's queries
+                        System.out.println("There is no information for the user:" + queryEntry.getKey()+"\n");
                     }
-                    sendEmail.sendEmail(fileSystem, dateDir, queryEntry.getKey(), resultArr);
                 }
-                Thread.sleep(1000 * 60);
+                Thread.sleep(1000 * 60 * 60);
             } else {
                 System.out.println("Current time do not need process.");
-                Thread.sleep(1000 * 60 );
+                Thread.sleep(1000 * 60 * 60 * 2);
             }
         }
 

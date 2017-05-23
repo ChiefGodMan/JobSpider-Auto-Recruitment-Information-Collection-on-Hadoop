@@ -5,29 +5,30 @@ import random
 import re
 import time
 import sys
-#reload(sys)
-#sys.setdefaultencoding("utf-8")
+from comm import *
 
 
 class ParseJsonData():
     def readJsonFile(self, name):
-        start_time_str = time.strftime("%Y-%m-%d")
+        #start_time_str = time.strftime("%Y-%m-%d")
+        start_time_str =getYesterDay()
         files_dir = "NewsmthScrapy/files/"+start_time_str
         if not os.path.isdir(files_dir):
             os.makedirs(files_dir)
         json_file = open(name)
         datas = json.load(json_file)
         json_file.close()
-        start_time_str = time.strftime("%Y-%m-%d")
         for data in datas:
             if data.get('url') and data.get('time') and data.get('title') and data.get('content'):
                 if data.get('title', "No Title") == "No Title":
                     print(data)
-                elif len(''.join(data['content'][5:])) > 50:
-                    title = re.sub(r'[、，：；。？！“”‘’《》→（）【】￥—|〡－\.\,\;\?\/\\\<\>\(\)\[\]\{\}\!\~`@#\$\%\^\&\*\_\+\-\=\:]','',data['title'][0]).replace(' ','')
-                    print(title)
-                    fname = start_time_str+"="+data['url'][0].replace(':', '-').replace('/','+')+"#"+title
-                    content = data['title'][0] + "\n\n" + '\n'.join(data['content'][5:])
+                elif len(''.join(data['content'])) > 50:
+                    title = re.sub(r'[、，：；。？！“”‘’《》→（）／【】［］￥—|〡－\.\,\;\?\/\\\<\>\(\)\[\]\{\}\!\~`@#\$\%\^\&\*\_\+\-\=\:]','',data['title'][0])\
+                        .replace(' ','').replace(' ','').replace(u'求职信息发布JobPost版北大未名BBS','').replace(u'饮水思源','')
+                    url = re.sub(r'[、，：；。？！“”‘’《》→（）／【】￥—|〡－\.\,\;\?\/\\\<\>\(\)\[\]\{\}\!\~`@#\$\%\^\&\*\_\+\-\=\:]','.',data['url'][0])
+                    #print("%s:%s" %(title,url))
+                    fname = start_time_str+"="+url+"#"+title
+                    content = data['title'][0] + '\n'.join(data['content'])
                     file = open(files_dir +"/"+ fname, 'w')
                     file.write(content)
                     file.close()

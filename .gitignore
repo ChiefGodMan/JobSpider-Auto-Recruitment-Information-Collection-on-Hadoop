@@ -3,3 +3,4 @@ files/training
 out
 *.jar
 lib/
+*.pyc

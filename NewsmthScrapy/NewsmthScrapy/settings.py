@@ -11,7 +11,7 @@
 
 BOT_NAME = 'NewsmthScrapy'
 
-SPIDER_MODULES = ['NewsmthScrapy.spiders',"YssySpider.spiders"]
+SPIDER_MODULES = ['NewsmthScrapy.spiders']
 NEWSPIDER_MODULE = 'NewsmthScrapy.spiders'
 
 

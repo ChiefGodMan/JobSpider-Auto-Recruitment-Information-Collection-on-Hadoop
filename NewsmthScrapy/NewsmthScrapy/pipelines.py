@@ -6,7 +6,7 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 from scrapy import signals
-from NewsmthScrapy.items import NewsmthscrapyItem
+from NewsmthScrapy.items import JobScrapyItem
 from twisted.enterprise import adbapi
 from scrapy.exporters import XmlItemExporter,CsvItemExporter,JsonItemExporter
 

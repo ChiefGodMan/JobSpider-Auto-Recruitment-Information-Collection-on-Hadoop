@@ -8,17 +8,7 @@
 import scrapy
 
 
-class NewsmthscrapyItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    url = scrapy.Field()
-    title = scrapy.Field()
-    time = scrapy.Field()
-    poster = scrapy.Field()
-    content = scrapy.Field()
-
-
-class YssyscrapyItem(scrapy.Item):
+class JobScrapyItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     url = scrapy.Field()
