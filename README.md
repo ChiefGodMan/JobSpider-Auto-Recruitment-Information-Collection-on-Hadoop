@@ -1,17 +1,14 @@
-============================
 ==WantJob program tutorial==
-============================
 
-Example:![alt text](https://github.com/ailias/JobSpider-Auto-Recruitment-Information-Collection-on-Hadoop/blob/master/1.jpg)
+Example:  
+![alt text](https://github.com/ailias/JobSpider-Auto-Recruitment-Information-Collection-on-Hadoop/blob/master/1.jpg)
 
   Firstly you should make sure your hadoop+hbase environment can work successfully, 
 then we can do the following configuration for running it.
 
-1: Starting hadoop and hbase environment.
+#1: Starting hadoop and hbase environment.
 
-###################
-2:create hbase tables
-###################
+#2:create hbase tables
 
 ##After starting the hbase, shell to hbase:
    $ hbase shell
@@ -22,18 +19,14 @@ then we can do the following configuration for running it.
    > create 'DocLength','doclength'
    > create 'TermFrequency','termfrequency'
 
-################
-3:Running crontab.sh in crontab env
-################
+#3:Running crontab.sh in crontab env
 
 ##First edit crontab file(make sure you have install crontab):
    $ crontab -e
 ##input following text and save(means running crontab.sh everyday at 1:00 am):
    0 1 * * * /path/to/WordSegmentation/NewsmthScrapy/crontab.sh
 
-###################
-4:create jar package for running the program
-###################
+#4:create jar package for running the program
 
 ##change the email account to your email for sending emails
   $ vim src/WordSegmentationMain.java
