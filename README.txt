@@ -2,7 +2,7 @@
 ==WantJob program tutorial==
 ============================
 
-Example:(https://github.com/ailias/JobSpider-Auto-Recruitment-Information-Collection-on-Hadoop/blob/master/1.jpg)
+Example:![alt text](https://github.com/ailias/JobSpider-Auto-Recruitment-Information-Collection-on-Hadoop/blob/master/1.jpg)
 
   Firstly you should make sure your hadoop+hbase environment can work successfully, 
 then we can do the following configuration for running it.
